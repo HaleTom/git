@@ -47,6 +47,7 @@ my $normal_color = $repo->get_color("", "reset");
 
 my $diff_algorithm = $repo->config('diff.algorithm');
 my $diff_filter = $repo->config('interactive.difffilter');
+my $diff_pager = $repo->config('pager.diff');
 
 my $use_readkey = 0;
 my $use_termcap = 0;
@@ -1488,9 +1489,11 @@ sub patch_update_file {
 	my $path = shift;
 	my ($head, @hunk) = parse_diff($path);
 	($head, my $mode, my $deletion, my $addition) = parse_diff_header($head);
+	open(PAGER, "|-", ("/bin/sh", "-c", $diff_pager)) or die("Can't open pager pipe: $!\n");
 	for (@{$head->{DISPLAY}}) {
-		print;
+		print PAGER or die("Can't print to pager pipe: $!\n");
 	}
+	close(PAGER) or die("Can't close pager pipe: $!\n");
 
 	if (@{$mode->{TEXT}}) {
 		unshift @hunk, $mode;
@@ -1557,9 +1560,11 @@ sub patch_update_file {
 		if ($hunk[$ix]{TYPE} eq 'hunk') {
 			$other .= ',e';
 		}
+		open(PAGER, "|-", ("/bin/sh", "-c", $diff_pager)) or die("Can't open pager pipe: $!\n");
 		for (@{$hunk[$ix]{DISPLAY}}) {
-			print;
+			print PAGER or die("Can't print to pager pipe: $!\n");
 		}
+		close(PAGER) or die("Can't close pager pipe: $!\n");
 		print colored $prompt_color, "(", ($ix+1), "/$num) ",
 			sprintf(__($patch_update_prompt_modes{$patch_mode}{$hunk[$ix]{TYPE}}), $other);
 
