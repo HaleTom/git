@@ -1486,15 +1486,11 @@ my %patch_update_prompt_modes = (
 
 sub patch_update_file {
 	my $quit = 0;
+	my $header_displayed = 0;  # The file header has not been printed yet
 	my ($ix, $num);
 	my $path = shift;
 	my ($head, @hunk) = parse_diff($path);
 	($head, my $mode, my $deletion, my $addition) = parse_diff_header($head);
-	open(PAGER, "|-", ("/bin/sh", "-c", $diff_pager)) or die("Can't open pager pipe: $!\n");
-	for (@{$head->{DISPLAY}}) {
-		print PAGER or die("Can't print to pager pipe: $!\n");
-	}
-	close(PAGER) or die("Can't close pager pipe: $!\n");
 
 	if (@{$mode->{TEXT}}) {
 		unshift @hunk, $mode;
@@ -1562,6 +1558,13 @@ sub patch_update_file {
 			$other .= ',e';
 		}
 		open(PAGER, "|-", ("/bin/sh", "-c", $diff_pager)) or die("Can't open pager pipe: $!\n");
+		# Display the header (if printing first hunk in file) then the hunk itself
+		if (!$header_displayed) {
+			for (@{$head->{DISPLAY}}) {
+				print PAGER or die("Can't print to pager pipe: $!\n");
+			}
+			$header_displayed = 1;
+		}
 		for (@{$hunk[$ix]{DISPLAY}}) {
 			print PAGER or die("Can't print to pager pipe: $!\n");
 		}
