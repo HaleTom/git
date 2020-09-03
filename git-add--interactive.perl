@@ -47,7 +47,8 @@ my $normal_color = $repo->get_color("", "reset");
 
 my $diff_algorithm = $repo->config('diff.algorithm');
 my $diff_filter = $repo->config('interactive.difffilter');
-my $diff_pager = $repo->config('pager.diff');
+my $diff_pager = $repo->config_bool('pager.diff');
+$diff_pager = $repo->config('core.pager') if $diff_pager == 1;
 
 my $use_readkey = 0;
 my $use_termcap = 0;
