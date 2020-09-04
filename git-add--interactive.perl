@@ -1312,7 +1312,8 @@ d - do not apply this hunk or any of the later hunks in the file"),
 sub help_patch_cmd {
 	local $_;
 	my $other = $_[0] . ",?";
-	print colored $help_color, __($help_patch_modes{$patch_mode}), "\n",
+	my $pager_fh = $_[1];
+	print $pager_fh colored $help_color, __($help_patch_modes{$patch_mode}), "\n",
 		map { "$_\n" } grep {
 			my $c = quotemeta(substr($_, 0, 1));
 			$other =~ /,$c/
@@ -1562,18 +1563,18 @@ sub patch_update_file {
 		if ($hunk[$ix]{TYPE} eq 'hunk') {
 			$other .= ',e';
 		}
-		open(PAGER, "|-", ("/bin/sh", "-c", $diff_pager)) or die("Can't open pager pipe: $!\n");
+		open(my $pager_fh, "|-", ("/bin/sh", "-c", $diff_pager)) or die("Can't open pager pipe: $!\n");
 		# Display the header (if printing first hunk in file) then the hunk itself
 		if (!$header_displayed) {
 			for (@{$head->{DISPLAY}}) {
-				print PAGER or die("Can't print to pager pipe: $!\n");
+				print $pager_fh $_ or die("Can't print to pager pipe: $!\n");
 			}
 			$header_displayed = 1;
 		}
 		for (@{$hunk[$ix]{DISPLAY}}) {
-			print PAGER or die("Can't print to pager pipe: $!\n");
+			print $pager_fh $_ or die("Can't print to pager pipe: $!\n");
 		}
-		close(PAGER) or die("Can't close pager pipe: $!\n");
+		close($pager_fh) or die("Can't close pager pipe: $!\n");
 		print colored $prompt_color, "(", ($ix+1), "/$num) ",
 			sprintf(__($patch_update_prompt_modes{$patch_mode}{$hunk[$ix]{TYPE}}), $other);
 
