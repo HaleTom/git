@@ -1562,7 +1562,8 @@ sub patch_update_file {
 		if ($hunk[$ix]{TYPE} eq 'hunk') {
 			$other .= ',e';
 		}
-		open(my $pager_fh, "|-", ("/bin/sh", "-c", $diff_pager)) or die("Can't open pager pipe: $!\n");
+
+		open(my $pager_fh, "|-", ("/bin/sh", "-c", $diff_pager)) or die sprintf(__("couldn't open pager pipe: %s"), $!);
 		if ($show_help) {
 			help_patch_cmd($other, $pager_fh);
 			$show_help = 0
@@ -1570,14 +1571,14 @@ sub patch_update_file {
 		# Display the header (if printing first hunk in file) then the hunk itself
 		if (!$header_displayed) {
 			for (@{$head->{DISPLAY}}) {
-				print $pager_fh $_ or die("Can't print to pager pipe: $!\n");
+				print $pager_fh $_ or die sprintf(__("couldn't print to pager pipe: %s"), $!);
 			}
 			$header_displayed = 1;
 		}
 		for (@{$hunk[$ix]{DISPLAY}}) {
-			print $pager_fh $_ or die("Can't print to pager pipe: $!\n");
+			print $pager_fh $_ or die sprintf(__("couldn't print to pager pipe: %s"), $!);
 		}
-		close($pager_fh) or die("Can't close pager pipe: $!\n");
+		close($pager_fh) or die sprintf(__("couldn't close pager pipe: %s"), $!);
 		print colored $prompt_color, "(", ($ix+1), "/$num) ",
 			sprintf(__($patch_update_prompt_modes{$patch_mode}{$hunk[$ix]{TYPE}}), $other);
 
