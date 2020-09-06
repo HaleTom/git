@@ -51,7 +51,7 @@ my $diff_filter = $repo->config('interactive.difffilter');
 my $diff_pager = $repo->config('pager.diff');
 # Boolean true literals are yes, on, true, and 1. Also, a variable defined without = <value> is taken as true.
 if ($diff_pager =~ /^|yes|on|true|1$/i) {
-	$diff_pager = $repo->config('core.pager')
+	chomp(($diff_pager) = run_cmd_pipe(qw(git var GIT_PAGER)));
 }
 $diff_pager = 'cat' if $diff_pager eq '';
 
